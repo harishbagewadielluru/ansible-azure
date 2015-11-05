@@ -1,0 +1,13 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - vars/vms.yml
+  tasks:
+
+    - name: Config ASM mode
+      command: azure config mode asm
+
+    - name: Deleting VM
+      command: azure vm delete -q {{ item }}
+      with_items: "{{ vms }}"
