@@ -1,0 +1,71 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - vars/azure.yml
+    - vars/vms.yml
+  tasks:
+
+    - name: config mode asm
+      command: azure config mode asm
+
+    - name: create VM
+      azure:
+        name: '{{ item.key }}'
+        role_size: '{{ role_size }}'
+        image: '{{ image_name }}'
+        location: '{{ location }}'
+        user: '{{ username }}'
+        password: '{{ password }}'
+        subscription_id: '{{ subscription_id }}'
+        management_cert_path: '{{ certificate_path }}'
+        storage_account: '{{ storage_account_name }}'
+        virtual_network_name: '{{ virtual_network_name }}'
+      with_dict: '{{ new_vms }}'
+      register : azure
+
+    - name: Adding data disk - I
+      command: azure vm disk attach-new '{{ item.key }}' '{{ data_disk_size }}' https://'{{ storage_account_name }}'.blob.core.windows.net/vhds/'{{ item.key }}'-data1.vhd
+      register: disk1
+      ignore_errors: true
+      with_dict: '{{ new_vms }}'
+
+    - name: Adding data disk - II
+      command: azure vm disk attach-new '{{ item.key }}' '{{ data_disk_size }}' https://'{{ storage_account_name }}'.blob.core.windows.net/vhds/'{{ item.key }}'-data2.vhd
+      register: disk2
+      when: disk1|success or disk1.results[0].stderr.find('already exists') != -1
+      with_dict: '{{ new_vms }}'
+
+    - command: azure vm shutdown '{{ item.key }}'
+      with_dict: "{{ new_vms }}"
+
+    - name: Assigning static-ip
+      command: azure vm static-ip set '{{ item.key }}' '{{ item.value.ip }}'
+      with_dict: "{{ new_vms }}"
+
+    - command: azure vm start '{{ item.key }}'
+      with_dict: "{{ new_vms }}"
+
+    - name: Add new instance to host group
+      add_host:
+        hostname: '{{ item }}'
+        groupname: launched
+      with_items: '{{ dns }}'
+
+    -  name: check for vm to be running
+       action:
+         module: wait_for
+         host: "{{ item }}"
+         port: 22
+         state: started
+         delay: 10
+         timeout: 900
+       delegate_to: 127.0.0.2
+       with_items: '{{ dns }}'
+
+- hosts: launched
+  remote_user: harish
+  gather_facts: no
+  tasks:
+   - name: create a file
+     command: touch /home/harish/sample.txt
