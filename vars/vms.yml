@@ -1,0 +1,9 @@
+resource_group: myResourceGroup
+new_vms:
+  lambho1:
+    ip: 10.0.0.65
+  lambho2:
+    ip: 10.0.0.64
+vms:
+  - pk47
+  - ak47
