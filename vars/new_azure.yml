@@ -1,0 +1,17 @@
+subscription_id: ""
+image: "OpenLogic:CentOS:6.7:latest"
+storage_account: ""
+virtual_network: ""
+username: ""
+password: ""
+vm_size: ""
+location: ""
+data_disk_size: ""
+commitlog_disk_size: ""
+subnet: ""
+resource_group: ""
+new_vms:
+  ak47:
+    ip: 10.0.0.47
+  pk47:
+    ip: 10.0.0.48
