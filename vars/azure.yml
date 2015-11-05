@@ -1,0 +1,14 @@
+subscription_id: ""
+certificate_path: ""
+image_name: "5112500ae3b842c8b9c604889f8753c3__OpenLogic-CentOS-67-20150815"
+storage_account_name: ""
+virtual_network_name: ""
+username: ""
+password: ""
+dns:
+ - lambho1.cloudapp.net
+ - lambho2.cloudapp.net
+role_size: "Small"
+location: "Central US"
+data_disk_size: "100"
+commitlog_disk_size: "10"
