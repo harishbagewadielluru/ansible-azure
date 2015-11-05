@@ -1,0 +1,17 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - vars/vms.yml
+  tasks:
+
+     - name:     Configure Azure ARM mode
+       command:  azure config mode arm
+
+     - name: Deleting VM
+       command: azure vm delete -q '{{ resource_group }}' '{{ item }}'
+       with_items: "{{ vms }}"
+
+     - name: Deleting NIC
+       command: azure network nic delete -q '{{ resource_group }}' '{{ item }}'_NIC_CARD
+       with_items: "{{ vms }}"
